@@ -48,7 +48,7 @@ def df_load_data(df, engine, table_name):
         # 데이터 적재
         
         try:
-            df.to_sql(table_name, engine, if_exists="append", index=False)
+            df.to_sql(table_name, conn, if_exists="append", index=False)
         except DataError as e:
             # 에러 메시지에서 열 이름 추출
             error_msg = str(e.orig)  # pymysql 에러 메시지
@@ -71,7 +71,7 @@ def extract_load_area_info(metadata, API_KEY):
 
     logging.basicConfig(filename="GET_DATA_EXCUTE.log", level=logging.INFO)
     
-    
+
     area_info_raw = defaultdict()
     for area_id in metadata:
 
@@ -82,7 +82,7 @@ def extract_load_area_info(metadata, API_KEY):
         
         data = requests.get(url)
         
-        area_info_raw[area_id] = json.loads(data.text)['CITYDATA']
+        area_info_raw[area_id] = json.loads(data.text.encode('utf-8'))['CITYDATA']
     
 
     area_info = defaultdict(dict)
