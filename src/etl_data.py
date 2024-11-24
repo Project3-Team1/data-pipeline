@@ -12,7 +12,7 @@ from src.utils.utils import df_append_metadata, df_load_data
 
 
 
-def extract_area_info(metadata, API_KEY):
+def extract_area_info(metadata, api_address):
 
     logging.basicConfig(filename="GET_DATA_EXCUTE.log", level=logging.INFO)
     
@@ -22,7 +22,7 @@ def extract_area_info(metadata, API_KEY):
 
         logging.info(f'READ_DATA : {area_id}')
         
-        url = f'http://openapi.seoul.go.kr:8088/{API_KEY}/json/citydata/1/5/{area_id}'
+        url = f'http://{api_address}/{area_id}'
         create_at = datetime.datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
         
         data = requests.get(url)
@@ -54,11 +54,12 @@ def transform_area_info(raw_area_info, create_at):
     return area_info
 
 
-def load_area_info(area_info):
-    USERNAME, PASSWORD = 'admin', 'admin'
-    engine = create_engine(f'mysql+pymysql://{USERNAME}:{PASSWORD}@localhost:3306/DE4_PROJECT3')
+def load_area_info(area_info, db_connection_info):
+    engine = create_engine(f'mysql+pymysql://{db_connection_info["user"]}:{db_connection_info["password"]}@{db_connection_info["host"]}:{db_connection_info["port"]}/{db_connection_info["schema"]}')
     # df.to_sql(name='bronze_weather_data', con=engine, if_exists='replace', index=False)
     logging.info('DB CONNECTION SUCCESS')
+
+    logging.info(pd.__version__)
     
     for area_id in area_info:
 
@@ -74,6 +75,7 @@ def load_area_info(area_info):
         df_load_data(area_info[area_id]['SUB_STTS'], engine = engine, table_name = 'BRONZE_SUB_STTS')
         df_load_data(area_info[area_id]['WEATHER_STTS'], engine = engine, table_name = 'BRONZE_WEATHER_STTS')
     
-        
+    engine.dispose()
+    logging.info('DB CONNECTION CLOSED')
 
 

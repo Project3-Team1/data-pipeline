@@ -38,12 +38,9 @@ def df_load_data(df, engine, table_name):
                 logging.info(f'{col} 열이 {table_name} 테이블에 추가되었습니다')
         else:
             logging.info(f"테이블 {table_name}이(가) 존재하지 않아 새로 생성됩니다.")
-            # create_query = ""
-            # conn.execute(create_query)
             db_columns = []
 
         # 데이터 적재
-        
         try:
             df.to_sql(table_name, conn, if_exists="append", index=False)
         except DataError as e:
