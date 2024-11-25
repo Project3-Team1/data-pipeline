@@ -27,10 +27,10 @@ def extract_area_info(metadata, api_address):
         
         data = requests.get(url)
         
-        try:
+        if data.text:
             raw_area_info[area_id] = json.loads(data.text.encode('utf-8'))['CITYDATA']
-        except:
-            logging.error(data.text)
+        else:
+            logging.warning(f'empty data in {area_id}')
     
     return raw_area_info, create_at
     
@@ -75,6 +75,12 @@ def load_area_info(area_info, db_connection_info):
         df_load_data(area_info[area_id]['SUB_STTS'], engine = engine, table_name = 'BRONZE_SUB_STTS')
         df_load_data(area_info[area_id]['WEATHER_STTS'], engine = engine, table_name = 'BRONZE_WEATHER_STTS')
     
+    with engine.connect() as conn:
+        conn.execute("CREATE TABLE DE4_PROJECT3.TEMP_BRONZE_CHARGER_STTS AS (SELECT * FROM DE4_PROJECT3.BRONZE_CHARGER_STTS)")
+        conn.execute("DROP TABLE DE4_PROJECT3.BRONZE_CHARGER_STTS")
+        conn.execute("CREATE TABLE DE4_PROJECT3.BRONZE_CHARGER_STTS AS (SELECT STAT_NM, STAT_ID, STAT_ADDR, STAT_X, STAT_Y, STAT_USETIME, STAT_PARKPAY, STAT_LIMITYN, STAT_LIMITDETAIL, STAT_KINDDETAIL, CHARGER_DETAILS, AREA_CD, CreateAt FROM (SELECT *, DATE_FORMAT(CreateAt, '%%Y%%m%%d%%H') date, ROW_NUMBER() OVER(PARTITION BY STAT_ID, DATE_FORMAT(CreateAt, '%%Y%%m%%d%%H') ORDER BY CreateAt) seq FROM DE4_PROJECT3.TEMP_BRONZE_CHARGER_STTS) first where seq = 1)")
+        conn.execute("DROP TABLE DE4_PROJECT3.TEMP_BRONZE_CHARGER_STTS")
+
     engine.dispose()
     logging.info('DB CONNECTION CLOSED')
 
