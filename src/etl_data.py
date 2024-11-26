@@ -8,7 +8,7 @@ from collections import defaultdict
 import pandas as pd
 import datetime
 
-from src.utils.utils import df_append_metadata, df_load_data
+from src.utils import df_append_metadata, df_load_data, remove_duplicate_data
 
 
 
@@ -75,11 +75,7 @@ def load_area_info(area_info, db_connection_info):
         df_load_data(area_info[area_id]['SUB_STTS'], engine = engine, table_name = 'BRONZE_SUB_STTS')
         df_load_data(area_info[area_id]['WEATHER_STTS'], engine = engine, table_name = 'BRONZE_WEATHER_STTS')
     
-    with engine.connect() as conn:
-        conn.execute("CREATE TABLE DE4_PROJECT3.TEMP_BRONZE_CHARGER_STTS AS (SELECT * FROM DE4_PROJECT3.BRONZE_CHARGER_STTS)")
-        conn.execute("DROP TABLE DE4_PROJECT3.BRONZE_CHARGER_STTS")
-        conn.execute("CREATE TABLE DE4_PROJECT3.BRONZE_CHARGER_STTS AS (SELECT STAT_NM, STAT_ID, STAT_ADDR, STAT_X, STAT_Y, STAT_USETIME, STAT_PARKPAY, STAT_LIMITYN, STAT_LIMITDETAIL, STAT_KINDDETAIL, CHARGER_DETAILS, AREA_CD, CreateAt FROM (SELECT *, DATE_FORMAT(CreateAt, '%%Y%%m%%d%%H') date, ROW_NUMBER() OVER(PARTITION BY STAT_ID, DATE_FORMAT(CreateAt, '%%Y%%m%%d%%H') ORDER BY CreateAt) seq FROM DE4_PROJECT3.TEMP_BRONZE_CHARGER_STTS) first where seq = 1)")
-        conn.execute("DROP TABLE DE4_PROJECT3.TEMP_BRONZE_CHARGER_STTS")
+    remove_duplicate_data(engine = engine)
 
     engine.dispose()
     logging.info('DB CONNECTION CLOSED')
