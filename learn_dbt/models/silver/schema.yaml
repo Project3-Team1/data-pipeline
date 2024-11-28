@@ -1,0 +1,122 @@
+version: 2
+
+sources:
+  - name: DE4_PROJECT3
+    schema: DE4_PROJECT3
+    tables:
+      - name: BRONZE_CHARGER_STTS
+        description: "충전소 상태 데이터 테이블"
+        columns:
+          - name: AREA_CD
+            description: "지역 코드"
+          - name: STAT_ID
+            description: "충전소 ID"
+          - name: STAT_USETIME
+            description: "충전소 사용 시간"
+      - name: BRONZE_ROAD_TRAFFIC_STTS
+        description: "도로 교통 데이터 테이블"
+        columns:
+          - name: AREA_CD
+            description: "지역 코드"
+          - name: AVG_ROAD_TRAFFIC_SPD
+            description: "평균 도로 속도"
+          - name: AVG_ROAD_TRAFFIC_TIME
+            description: "평균 교통 소요 시간"
+      - name: BRONZE_EVENT_STTS
+        description: "이벤트 관련 데이터 테이블"
+        columns:
+          - name: AREA_CD
+            description: "지역 코드"
+          - name: EVENT_NM
+            description: "이벤트 이름"
+          - name: EVENT_PERIOD
+            description: "이벤트 기간"
+          - name: EVENT_PLACE
+            description: "이벤트 장소"
+      - name: BRONZE_LIVE_PPLTN_STTS
+        description: "실시간 인구 데이터 테이블"
+        columns:
+          - name: AREA_CD
+            description: "지역 코드"
+          - name: AREA_CONGEST_LVL
+            description: "혼잡도 레벨"
+          - name: AREA_PPLTN_MIN
+            description: "최소 인구 수"
+          - name: AREA_PPLTN_MAX
+            description: "최대 인구 수"
+      - name: BRONZE_WEATHER_STTS
+        description: "날씨 관련 데이터 테이블"
+        columns:
+          - name: AREA_CD
+            description: "지역 코드"
+          - name: TEMP
+            description: "기온"
+          - name: WIND_SPD
+            description: "평균 풍속"
+
+models:
+  - name: SILVER_CHARGER_TRAFFIC
+    description: "충전소와 교통 데이터를 결합한 테이블"
+    columns:
+      - name: AREA_CD
+        description: "지역 코드"
+      - name: CHARGER_ID
+        description: "충전소 ID"
+      - name: USE_TIME
+        description: "충전소 사용 시간"
+      - name: ROAD_SPEED
+        description: "도로 평균 속도"
+      - name: TRAFFIC_TIME
+        description: "평균 교통 소요 시간"
+      - name: CreateAt
+        description: "추출 시간"
+
+  - name: SILVER_EVENT_POPULATION
+    description: "이벤트와 인구 데이터를 결합한 테이블"
+    columns:
+      - name: AREA_CD
+        description: "지역 코드"
+      - name: EVENT_NM
+        description: "이벤트 이름"
+      - name: EVENT_PERIOD
+        description: "이벤트 기간"
+      - name: EVENT_PLACE
+        description: "이벤트 장소"
+      - name: AREA_CONGEST_LVL
+        description: "혼잡도 레벨"
+      - name: AREA_PPLTN_MIN
+        description: "최소 인구 수"
+      - name: AREA_PPLTN_MAX
+        description: "최대 인구 수"
+      - name: CreateAt
+        description: "추출 시간"
+  - name: SILVER_TRAFFIC_POPULATION
+    description: "교통 데이터와 인구 데이터를 결합한 테이블"
+    columns:
+      - name: AREA_CD
+        description: "지역 코드"
+      - name: ROAD_TRAFFIC_SPD
+        description: "평균 도로 속도"
+      - name: ROAD_TRAFFIC_TIME
+        description: "평균 교통 소요 시간"
+      - name: AREA_CONGEST_LVL
+        description: "혼잡도 레벨"
+      - name: AREA_PPLTN_MIN
+        description: "최소 인구 수"
+      - name: AREA_PPLTN_MAX
+        description: "최대 인구 수"
+      - name: CreateAt
+        description: "추출 시간"
+  - name: SILVER_WEATHER_EVENTS
+    description: "날씨 데이터와 이벤트 데이터를 결합한 테이블"
+    columns:
+      - name: AREA_CD
+        description: "지역 코드"
+      - name: TEMP
+        description: "기온"
+      - name: WIND_SPD
+        description: "풍속"
+      - name: EVENT_COUNT
+        description: "이벤트 이름"
+      - name: CreateAt
+        description: "추출 시간"
