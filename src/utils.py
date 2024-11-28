@@ -2,12 +2,19 @@
 
 import logging
 
-from sqlalchemy import inspect, text
+from sqlalchemy import inspect, text, engine
 from sqlalchemy.exc import DataError
+import pandas as pd
 import re
 
 
-def df_append_metadata(df, area_id, create_at):
+def df_append_metadata(df:pd.core.frame.DataFrame, area_id:str, create_at:str) -> pd.core.frame.DataFrame:
+    """
+    add metadata info
+        - input: dataframe, area_id, timestamp
+        - output: datafram with metadata
+    """
+
     df['AREA_CD'] = area_id
     df['CreateAt'] = create_at
     
@@ -19,7 +26,12 @@ def df_append_metadata(df, area_id, create_at):
     return df
 
 
-def df_load_data(df, engine, table_name):
+def df_load_data(df:pd.core.frame.DataFrame, engine:engine.base.Engine, table_name:str):
+    """
+    load data from dataframe to DB table
+        - input: dataframe, engine (DB connection), table name 
+    """
+
     # 테이블 스키마 확인 및 동적 업데이트
     with engine.connect() as conn:
         inspector = inspect(conn)
@@ -58,7 +70,12 @@ def df_load_data(df, engine, table_name):
             df.to_sql(table_name, conn, if_exists='append', index=False)
 
 
-def remove_duplicate_data(engine):
+def remove_duplicate_data(engine:engine.base.Engine):
+    """
+    remove duplicate data for incremental update
+        - input: engine (DB connection)
+    """
+
     with engine.connect() as conn:
         # CHARGER_STTS
         logging.info(f'REMOVE DUPLICATE DATA : CHARGER_STTS')

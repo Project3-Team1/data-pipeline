@@ -1,6 +1,7 @@
 
-import json
+from typing import Dict, Tuple
 import logging
+import json
 import requests
 from sqlalchemy import create_engine
 
@@ -12,7 +13,24 @@ from src.utils import df_append_metadata, df_load_data, remove_duplicate_data
 
 
 
-def extract_area_info(metadata, api_address):
+def extract_area_info(metadata:Dict[str,str], api_address:str) -> Tuple[Dict,str]:
+    """
+    extract data from API
+        - input: area info data
+            {
+                "POI001": "강남 MICE 관광특구",
+                "POI002": "동대문 관광특구",
+                ...
+            }
+        - output: area info data, timestamp
+            area info data
+                {
+                    "POI001": json format from API,
+                    "POI002": json format from API,
+                    ...
+                },
+            timestamp: date format
+    """
 
     raw_area_info = defaultdict()
     for area_id in metadata:
@@ -35,7 +53,35 @@ def extract_area_info(metadata, api_address):
     return raw_area_info, create_at
     
 
-def transform_area_info(raw_area_info, create_at):
+def transform_area_info(raw_area_info:Dict, create_at:str) -> Dict[str,Dict[str,pd.core.frame.DataFrame]]:
+    """
+    transform json to dataframe
+        - input: area info data with json, timestamp
+            area info data
+                {
+                    "POI001": json format from API,
+                    "POI002": json format from API,
+                    ...
+                },
+            timestamp: date format
+        - output: area info dataframe
+            {
+                "POI001":
+                    {
+                        "CHARGER_STTS": dataframe,
+                        "EVENT_STTS": dataframe,
+                        ... 
+                    },
+                "POI002":
+                    {
+                        "CHARGER_STTS": dataframe,
+                        "EVENT_STTS": dataframe,
+                        ... 
+                    },
+                ...
+            }
+    """
+
     area_info = defaultdict(dict)
     for area_id in raw_area_info:
         # make_DataFrame
@@ -54,7 +100,27 @@ def transform_area_info(raw_area_info, create_at):
     return area_info
 
 
-def load_area_info(area_info, db_connection_info):
+def load_area_info(area_info:Dict[str,Dict[str,pd.core.frame.DataFrame]], db_connection_info:Dict[str,str]):
+    """
+    load data
+        - input: area info dataframe
+            {
+                "POI001":
+                    {
+                        "CHARGER_STTS": dataframe,
+                        "EVENT_STTS": dataframe,
+                        ... 
+                    },
+                "POI002":
+                    {
+                        "CHARGER_STTS": dataframe,
+                        "EVENT_STTS": dataframe,
+                        ... 
+                    },
+                ...
+            }
+    """
+    
     engine = create_engine(f'mysql+pymysql://{db_connection_info["user"]}:{db_connection_info["password"]}@{db_connection_info["host"]}:{db_connection_info["port"]}/{db_connection_info["schema"]}')
     logging.info('DB CONNECTION SUCCESS')
 
