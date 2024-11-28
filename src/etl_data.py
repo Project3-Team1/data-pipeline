@@ -28,7 +28,7 @@ def extract_area_info(metadata, api_address):
             try:
                 raw_area_info[area_id] = json.loads(data.text.encode('utf-8'))['CITYDATA']
             except Exception as e:
-                pass
+                logging.warning(f'data is not empty but something wrong in {area_id}')
         else:
             logging.warning(f'empty data in {area_id}')
     
