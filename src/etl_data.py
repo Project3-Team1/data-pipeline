@@ -14,9 +14,6 @@ from src.utils import df_append_metadata, df_load_data, remove_duplicate_data
 
 def extract_area_info(metadata, api_address):
 
-    logging.basicConfig(filename="GET_DATA_EXCUTE.log", level=logging.INFO)
-    
-
     raw_area_info = defaultdict()
     for area_id in metadata:
 
@@ -28,7 +25,10 @@ def extract_area_info(metadata, api_address):
         data = requests.get(url)
         
         if data.text:
-            raw_area_info[area_id] = json.loads(data.text.encode('utf-8'))['CITYDATA']
+            try:
+                raw_area_info[area_id] = json.loads(data.text.encode('utf-8'))['CITYDATA']
+            except Exception as e:
+                pass
         else:
             logging.warning(f'empty data in {area_id}')
     
@@ -56,7 +56,6 @@ def transform_area_info(raw_area_info, create_at):
 
 def load_area_info(area_info, db_connection_info):
     engine = create_engine(f'mysql+pymysql://{db_connection_info["user"]}:{db_connection_info["password"]}@{db_connection_info["host"]}:{db_connection_info["port"]}/{db_connection_info["schema"]}')
-    # df.to_sql(name='bronze_weather_data', con=engine, if_exists='replace', index=False)
     logging.info('DB CONNECTION SUCCESS')
 
     logging.info(pd.__version__)
