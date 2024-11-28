@@ -1,6 +1,7 @@
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.operators.bash import BashOperator
 from datetime import datetime
 from airflow.models.variable import Variable
 
@@ -20,13 +21,14 @@ def get_data(**context):
 
 
 dag = DAG(
-    dag_id='Get-Data',
+    dag_id='Airflow-Dbt',
     start_date=datetime(2024,11,22),
     catchup=False,
     tags=['project'],
     schedule='0 * * * *')
 
 
+# ETL
 get_area_info = PythonOperator(
     task_id = 'get_data',
     #python_callable param points to the function you want to run 
@@ -38,7 +40,16 @@ get_area_info = PythonOperator(
     dag = dag)
 
 
+# DBT execution
+dbt_full_refresh = BashOperator(
+    task_id='dbt_full_refresh',
+    bash_command="exit && cd /home/ubuntu/learn_dbt && dbt run --full-refresh",
+    dag=dag
+)
+
+
 #Assign the order of the tasks in our DAG
-get_area_info
+get_area_info >> dbt_full_refresh
+
 
 
