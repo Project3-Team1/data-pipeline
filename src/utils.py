@@ -12,7 +12,7 @@ def df_append_metadata(df:pd.core.frame.DataFrame, area_id:str, create_at:str) -
     """
     add metadata info
         - input: dataframe, area_id, timestamp
-        - output: datafram with metadata
+        - output: dataframe with metadata
     """
 
     df['AREA_CD'] = area_id

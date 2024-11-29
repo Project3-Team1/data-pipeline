@@ -43,7 +43,7 @@ get_area_info = PythonOperator(
 # DBT execution
 dbt_full_refresh = BashOperator(
     task_id='dbt_full_refresh',
-    bash_command="exit && cd /home/ubuntu/learn_dbt && dbt run --full-refresh",
+    bash_command=f'exit && cd {Variable.get("dbt_path")} && dbt run --full-refresh && dbt docs generate',
     dag=dag
 )
 
